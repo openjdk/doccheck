@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="doccheck" default="all">
+
+    <property file="build.properties"/>
+    <property name="build.dir" value="build"/>
+    <property name="src.dir" value="src"/>
+    <property name="dist.dir" value="dist"/>
+
+    <target name="all" depends="jar,docs"/>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <jar destfile="${dist.dir}/doccheck.jar" basedir="${build.dir}/classes">
+            <manifest>
+                <attribute name="Main-Class" value="doccheck.Main"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac srcdir="${src.dir}/classes"
+               includes="**/*.java" includeantruntime="false"
+               debug="true"
+               destdir="${build.dir}/classes" />
+    </target>
+
+    <target name="docs">
+        <mkdir dir="${dist.dir}"/>
+        <copy file="${src.dir}/doc/stylesheet.css" todir="${dist.dir}"/>
+        <echo level="verbose" message="Generating doccheck.html"/>
+        <exec executable="pandoc">
+            <arg value="--standalone"/>
+            <arg line="--output ${dist.dir}/doccheck.html"/>
+            <arg line="--css stylesheet.css"/>
+            <arg file="${src.dir}/doc/doccheck.md"/>
+        </exec>
+        <echo level="verbose" message="Generating doccheck.1"/>
+        <exec executable="pandoc">
+            <arg value="--variable=section:1 "/>
+            <arg line="--output ${dist.dir}/doccheck.1"/>
+            <arg line="--css stylesheet.css"/>
+            <arg file="${src.dir}/doc/doccheck.md"/>
+        </exec>
+    </target>
+</project>
