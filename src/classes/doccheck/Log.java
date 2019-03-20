@@ -90,6 +90,14 @@ public class Log implements AutoCloseable {
         warnings++;
     }
 
+    public void note(Path path, String message, Object... args) {
+        out.println(againstBaseDir(path) + ": Note: " + String.format(message, args));
+    }
+
+    public void note(Path path, int line, String message, Object... args) {
+        out.println(againstBaseDir(path) + ":" + line + ": Note: " + String.format(message, args));
+    }
+
     public void report(String message, Object... args) {
         out.println(String.format(message, args));
         reports++;

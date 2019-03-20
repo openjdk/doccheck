@@ -105,6 +105,7 @@ class HtmlFileChecker implements FileChecker {
                 new InputStreamReader(Files.newInputStream(path), decoder))) {
             this.path = path;
             this.in = r;
+            StringBuilder content = new StringBuilder();
 
             startFile(path);
             try {
@@ -116,10 +117,17 @@ class HtmlFileChecker implements FileChecker {
                     switch (ch) {
 
                         case '<':
+                            content(content.toString());
+                            content.setLength(0);
                             html();
                             break;
 
                         default:
+                            content.append((char) ch);
+                            if (ch == '\n') {
+                                content(content.toString());
+                                content.setLength(0);
+                            }
                             nextChar();
                     }
                 }
@@ -152,6 +160,10 @@ class HtmlFileChecker implements FileChecker {
 
     private void endElement(String name) {
         htmlCheckers.forEach(c -> c.endElement(lineNumber, name));
+    }
+
+    private void content(String s) {
+        htmlCheckers.forEach(c -> c.content(lineNumber, s));
     }
 
     private void nextChar() throws IOException {

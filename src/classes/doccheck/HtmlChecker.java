@@ -86,4 +86,11 @@ public interface HtmlChecker extends Checker {
      */
     void endElement(int line, String name);
 
+    /**
+     * Checks the content appearing in between HTML tags.
+     * @param line the line number on which the content was found
+     * @param content the content
+     */
+    default void content(int line, String content) { }
+
 }
