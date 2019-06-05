@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -77,6 +77,8 @@ public class LegalNoticeChecker implements FileChecker {
             unknown++;
         } else if(path.getFileName().toString().matches(".*-(no)?frame\\.html")) {
             packageFrames++;
+        } else if (isMetaRefresh) {
+            metaRefresh++;
         } else if (!path.getFileName().toString().equals("copyright.html")) {
             log.error(this.path, "file appears to have no copyright");
             errs++;
@@ -87,12 +89,14 @@ public class LegalNoticeChecker implements FileChecker {
     public void report(Reporter r) {
         r.startSection("Legal Notices Report", log);
         r.report(false, "%6d files read", files);
-        r.report((ok + packageFrames < files),
+        r.report((ok + packageFrames + metaRefresh < files),
                 "%6d files had no issues", ok);
         r.report((unknown > 0),
                 "%6d unrecognized copyright lines", unknown);
         r.report(false,
                 "%6d files with no copyright expected", packageFrames);
+        r.report(false,
+                "%6d meta-refresh files with no copyright", metaRefresh);
         r.report((errs > 0),
                 "%6d files with no copyright", errs);
         r.endSection();
@@ -100,7 +104,7 @@ public class LegalNoticeChecker implements FileChecker {
 
     @Override
     public boolean isOK() {
-        return (ok + packageFrames == files)
+        return (ok + packageFrames + metaRefresh == files)
                 && (unknown == 0)
                 && (errs == 0);
     }
@@ -110,11 +114,20 @@ public class LegalNoticeChecker implements FileChecker {
         log.close();
     }
 
+    private static final String META_REFRESH = "<meta http-equiv=\"refresh\" content=\"0;url=";
+
     Stream<String> getLastLines(Path path, int size) {
         Deque<String> lines = new LinkedList<>();
         try (BufferedReader in = new BufferedReader(new InputStreamReader(
                 Files.newInputStream(path), decoder))) {
             in.lines().forEach(l -> {
+                if (!inBody) {
+                    if (l.regionMatches(true, 0, META_REFRESH, 0, META_REFRESH.length())) {
+                        isMetaRefresh = true;
+                    } else if (l.toLowerCase(Locale.US).contains("<body")) {
+                        inBody = true;
+                    }
+                }
                 lines.addLast(l);
                 if (lines.size() > size) {
                     lines.removeFirst();
@@ -141,9 +154,12 @@ public class LegalNoticeChecker implements FileChecker {
     private int ok;
     private int unknown;
     private int packageFrames;
+    private int metaRefresh;
     private int errs;
 
     private Path path;
     private boolean foundCopyright;
     private boolean foundUnknownCopyright;
+    private boolean inBody;
+    private boolean isMetaRefresh;
 }

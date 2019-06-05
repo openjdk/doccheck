@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -52,6 +52,8 @@ public class TableChecker implements HtmlChecker {
     private final Map<String, Integer> tableStyleOKCounts = new TreeMap<>();
     private final Log log;
     private boolean passed;
+    private int tablesWithErrors;
+    private int errors;
 
     private Path currFile;
     private boolean html5;
@@ -85,8 +87,15 @@ public class TableChecker implements HtmlChecker {
             r.report((totalPercent != 100),
                     "%-17s %5d %5d %3d%%", "TOTAL", total, totalOK, totalPercent);
         }
+
+        r.report(false, "");
+
+        r.report(errors > 0,
+                "%6d errors", errors);
+        r.report(tablesWithErrors > 0,
+                "%6d tables with errors", tablesWithErrors);
         r.endSection();
-        passed = (totalOK == total);
+        passed = (totalOK == total) && (tablesWithErrors == 0) && (errors == 0);
     }
 
     @Override
@@ -133,7 +142,12 @@ public class TableChecker implements HtmlChecker {
     public void endElement(int line, String name) {
         switch (name) {
             case "table":
-                getCurrTable(line).endTable(line);
+                Table t = getCurrTable(line);
+                t.endTable(line);
+                if (t.errors > 0) {
+                    tablesWithErrors++;
+                    errors += t.errors;
+                }
                 tableStack.pop();
         }
     }

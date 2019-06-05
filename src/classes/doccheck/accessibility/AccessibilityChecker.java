@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@ package doccheck.accessibility;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 
 import doccheck.HtmlChecker;
@@ -79,6 +80,8 @@ public class AccessibilityChecker implements HtmlChecker {
     private int unorderedHeadingsCount;
     /** Whether the scan is within a {@code <body>} tag in the current file. */
     private boolean inBody;
+    /** Whether the file is just a redirect file. */
+    private boolean isMetaRefresh;
     /** Whether or not to check for content outside a region in the current file. */
     private boolean checkContent;
     /** The stack of active regions. */
@@ -101,6 +104,7 @@ public class AccessibilityChecker implements HtmlChecker {
         inBody = false;
         checkContent = false;
         contentOutsideRegion = false;
+        isMetaRefresh = false;
         activeRegions = new Stack<>();
         tableChecker.startFile(path);
     }
@@ -148,6 +152,15 @@ public class AccessibilityChecker implements HtmlChecker {
                 startHtml(line, attrs);
                 break;
 
+            case "meta":
+                if (Objects.equals(attrs.get("http-equiv"), "refresh")) {
+                    String content = attrs.get("content");
+                    if (content != null && content.matches("(?i)0;url=.*")) {
+                        isMetaRefresh = true;
+                    }
+                }
+                break;
+
             case "script":
             case "noscript":
                 checkContent = false;
@@ -170,7 +183,7 @@ public class AccessibilityChecker implements HtmlChecker {
             case "body":
                 inBody = false;
                 checkContent = false;
-                if (h1Count == 0) {
+                if (h1Count == 0 && !isMetaRefresh) {
                     log.error(path, line, "no <h1> found");
                     noH1Files++;
                 } else if (h1Count > 1) {
