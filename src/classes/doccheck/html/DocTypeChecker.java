@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -51,6 +51,7 @@ public class DocTypeChecker implements HtmlChecker {
     private final Log log;
 
     private int html5;
+    private int html5_legacy;
     private int xml;
     private final Map<String, Integer> counts = new HashMap<>();
     private int other;
@@ -84,18 +85,24 @@ public class DocTypeChecker implements HtmlChecker {
                     + "\\s+html"
                     + "\\s+([a-z]+)"
                     + "\\s+\"([^\"]+)\""
-                    + "(\\s+\"([^\"]+)\")?"
+                    + "(?:\\s+\"([^\"]+)\")?"
                     + "\\s*");
             Matcher m = p.matcher(docType);
             if (m.matches()) {
-                String version = m.group(2);
-                List<String> allowedVersions = List.of(
-                        "-//W3C//DTD XHTML 1.0 Strict//EN"
-                );
-                if (!allowedVersions.stream().anyMatch(v -> v.equals(version))) {
-                    log.error(path, line, "unexpected doctype: " + version);
+                // See http://www.w3.org/tr/html52/syntax.html#the-doctype
+                if (m.group(1).equalsIgnoreCase("system")
+                    && m.group(2).equals("about:legacy-compat")) {
+                    html5_legacy++;
+                } else {
+                    String version = m.group(2);
+                    List<String> allowedVersions = List.of(
+                            "-//W3C//DTD XHTML 1.0 Strict//EN"
+                    );
+                    if (!allowedVersions.stream().anyMatch(v -> v.equals(version))) {
+                        log.error(path, line, "unexpected doctype: " + version);
+                    }
+                    counts.put(version, counts.getOrDefault(version, 0) + 1);
                 }
-                counts.put(version, counts.getOrDefault(version, 0) + 1);
             } else {
                 log.error(path, line, "doctype not recognized: " + docType);
                 other++;
@@ -119,6 +126,9 @@ public class DocTypeChecker implements HtmlChecker {
         }
         if (html5 > 0) {
             r.report(false, "%6d: HTML5%n", html5);
+        }
+        if (html5_legacy > 0) {
+            r.report(false, "%6d: HTML5 (legacy)%n", html5_legacy);
         }
 
         Map<Integer, Set<String>> sortedCounts = new TreeMap<>(
