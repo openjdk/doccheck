@@ -31,6 +31,7 @@
         <echo level="verbose" message="Generating doccheck.html"/>
         <exec executable="pandoc">
             <arg value="--standalone"/>
+            <arg line="--to html5"/>
             <arg line="--output ${dist.dir}/doccheck.html"/>
             <arg line="--css stylesheet.css"/>
             <arg file="${src.dir}/doc/doccheck.md"/>
