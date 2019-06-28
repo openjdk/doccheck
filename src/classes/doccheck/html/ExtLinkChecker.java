@@ -46,8 +46,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Checks the external links referenced in HTML files.
@@ -144,6 +146,36 @@ public class ExtLinkChecker implements HtmlChecker {
         if (!redirects.isEmpty()) {
             r.startTable("Redirects", List.of("URL", "Redirected to"));
             redirects.forEach((url, red) -> r.addTableRow(List.of(url.toString(), red.toString())));
+            r.endTable();
+        }
+
+        Pattern ORACLE_COM = Pattern.compile("(?i)oracle.com");
+        Pattern SE_VERSION = Pattern.compile("(?i)[=/](java)?se(/)?(?<v>[0-9]+)/");
+
+        Map<Integer, Set<URI>> refs = new TreeMap<>();
+        for (Map.Entry<URI, Set<Path>> entry : allURIs.entrySet()) {
+            URI uri = entry.getKey();
+            if (ORACLE_COM.matcher(uri.getHost()).find()) {
+                Matcher m = SE_VERSION.matcher(uri.toString());
+                if (m.find()) {
+                    int v = Integer.parseInt(m.group("v"));
+                    refs.computeIfAbsent(v, s -> new TreeSet<>()).add(uri);
+                }
+            }
+        }
+        if (!refs.isEmpty()) {
+            r.startTable("References to Earlier Releases",
+                    List.of("Version", "URL", "Referenced in file"));
+            for (Map.Entry<Integer, Set<URI>> e1 : refs.entrySet()) {
+                String v = String.valueOf(e1.getKey());
+                for (URI uri : e1.getValue()) {
+                    Set<Path> paths = allURIs.get(uri);
+                    String list = paths.stream()
+                            .map(Object::toString)
+                            .collect(Collectors.joining("<br>"));
+                    r.addTableRow(List.of(v, uri.toString(), list));
+                }
+            }
             r.endTable();
         }
 
