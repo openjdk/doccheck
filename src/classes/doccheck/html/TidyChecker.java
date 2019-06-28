@@ -26,17 +26,24 @@
 package doccheck.html;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import doccheck.FileChecker;
 import doccheck.Log;
@@ -55,6 +62,7 @@ public class TidyChecker implements FileChecker {
 
     public TidyChecker(Log log) {
         this.log = log;
+        checkTidy();
     }
 
     @Override
@@ -75,6 +83,49 @@ public class TidyChecker implements FileChecker {
             }
         } catch (IOException e) {
             log.error(path, e);
+        }
+    }
+
+    private void checkTidy() {
+        boolean isWindows = System.getProperty("os.name")
+                .toLowerCase(Locale.US)
+                .startsWith("windows");
+        String tidyExe = isWindows ? "tidy.exe" : "tidy";
+        Optional<Path> tidyExePath = Stream.of(System.getenv("PATH")
+                .split(File.pathSeparator))
+                .map(Path::of)
+                .map(d -> d.resolve(tidyExe))
+                .filter(Files::exists)
+                .findFirst();
+        if (tidyExePath.isPresent()) {
+            if (Files.isExecutable(tidyExePath.get())) {
+                try {
+                    Process p = new ProcessBuilder()
+                            .command("tidy", "-version")
+                            .redirectErrorStream(true)
+                            .start();
+                    try (BufferedReader r =
+                                 new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                        List<String> lines = r.lines().collect(Collectors.toList());
+                        // Look for a line containing "version" and a dotted identifier beginning 5.
+                        Pattern version = Pattern.compile("version.* [5678]\\.[0-9]+(\\.[0-9]+)");
+                        if (lines.stream().anyMatch(line -> version.matcher(line).find())) {
+                            // found version string
+                        } else {
+                            String lineSep = System.lineSeparator();
+                            log.error("Could not determine the version of 'tidy' on the PATH\n" +
+                                    lines.stream().collect(Collectors.joining(lineSep)));
+                        }
+                    }
+                } catch (IOException e) {
+                    log.error("Could not execute 'tidy -version': " + e);
+                }
+            } else {
+                log.error("The 'tidy' program found on the PATH is not executable.");
+            }
+        } else {
+            log.error("The 'tidy' program was not found on the PATH.\n" +
+                    "For information about 'tidy', see https://www.html-tidy.org/");
         }
     }
 
