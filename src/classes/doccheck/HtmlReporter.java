@@ -26,6 +26,7 @@
 package doccheck;
 
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
@@ -90,7 +91,14 @@ public class HtmlReporter extends Reporter {
     @Override
     public void addTableRow(List<String> values) {
         out.print("<tr>");
-        values.forEach(v -> out.print("<td>" + encode(v)));
+        values.forEach(v -> {
+            String ev = encode(v);
+            if (v.matches("http[s]?:[^ ]+")) {
+                out.print("<td><a href=\"" + ev + "\">" + ev + "</a>");
+            } else {
+                out.print("<td>" + ev);
+            }
+        });
         out.println();
     }
 
