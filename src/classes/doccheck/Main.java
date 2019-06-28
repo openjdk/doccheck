@@ -37,6 +37,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -662,7 +663,8 @@ public class Main implements java.util.spi.ToolProvider {
                 if (Files.isDirectory(f)) {
                     logFile = f.resolve(tail);
                 } else {
-                    logFile = f.getParent().resolve(f.getFileName()
+                    Path dir = (f.getParent() == null) ? Path.of(".") : f.getParent();
+                    logFile = dir.resolve(f.getFileName()
                             .toString()
                             .replaceAll("\\.[a-z]+$", "-" + tail));
                 }
@@ -698,6 +700,13 @@ public class Main implements java.util.spi.ToolProvider {
                 default:
                     throw new Error();
             }
+
+            if (log.errors > 0) {
+                log.report("Errors reported; checking cancelled");
+                log.close();
+                return Collections.emptyMap();
+            }
+
             checkers.put(check, checker);
             if (checker instanceof HtmlChecker) {
                 htmlCheckers.add((HtmlChecker) checker);

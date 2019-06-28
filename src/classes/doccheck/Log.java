@@ -80,6 +80,11 @@ public class Log implements AutoCloseable {
         errors++;
     }
 
+    public void error(String message, Object... args) {
+        out.println(String.format(message, args));
+        errors++;
+    }
+
     public void warn(Path path, String message, Object... args) {
         out.println(againstBaseDir(path) + ": Warning: " + String.format(message, args));
         warnings++;
@@ -121,7 +126,9 @@ public class Log implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        if (file != null) {
+        if (file == null) {
+            out.flush();
+        } else {
 //            System.err.println("closing " + file  + ", " + errors + " errors, "  + warnings + " warnings, " + reports + " reports");
             out.close();
         }
