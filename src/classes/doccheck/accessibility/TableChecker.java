@@ -266,6 +266,14 @@ public class TableChecker implements HtmlChecker {
                         }
                     }
                 }
+
+                if (maxRows == 1) {
+                    error(line, "table has only one row");
+                }
+
+                if (maxCols == 1) {
+                    error(line, "table has only one column");
+                }
             }
 
             if (errors == 0) {
