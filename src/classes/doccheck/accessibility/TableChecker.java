@@ -369,8 +369,10 @@ public class TableChecker implements HtmlChecker {
                     cells.add(null);
                 cells.add(cell);
             }
-            maxRows = Math.max(maxRows, r);
-            maxCols = Math.max(maxCols, c);
+            // r, c are 0-based coordinates
+            // maxRows, maxCols give the max number of rows and columns
+            maxRows = Math.max(maxRows, r + 1);
+            maxCols = Math.max(maxCols, c + 1);
         }
 
         Cell get(int r, int c) {
