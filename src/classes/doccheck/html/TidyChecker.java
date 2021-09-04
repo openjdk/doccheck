@@ -57,12 +57,13 @@ import doccheck.Reporter;
 public class TidyChecker implements FileChecker {
     private final Log log;
     private boolean passed;
+    private Path TIDY;
 
     private Path path;
 
     public TidyChecker(Log log) {
         this.log = log;
-        checkTidy();
+        TIDY = initTidy();
     }
 
     @Override
@@ -71,7 +72,7 @@ public class TidyChecker implements FileChecker {
         files++;
         try {
             Process p = new ProcessBuilder()
-                .command("tidy",
+                .command(TIDY.toString(),
                         "-e",
                         "--gnu-emacs", "true",
                         path.toString())
@@ -86,47 +87,58 @@ public class TidyChecker implements FileChecker {
         }
     }
 
-    private void checkTidy() {
-        boolean isWindows = System.getProperty("os.name")
-                .toLowerCase(Locale.US)
-                .startsWith("windows");
-        String tidyExe = isWindows ? "tidy.exe" : "tidy";
-        Optional<Path> tidyExePath = Stream.of(System.getenv("PATH")
-                .split(File.pathSeparator))
-                .map(Path::of)
-                .map(d -> d.resolve(tidyExe))
-                .filter(Files::exists)
-                .findFirst();
-        if (tidyExePath.isPresent()) {
-            if (Files.isExecutable(tidyExePath.get())) {
-                try {
-                    Process p = new ProcessBuilder()
-                            .command("tidy", "-version")
-                            .redirectErrorStream(true)
-                            .start();
-                    try (BufferedReader r =
-                                 new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                        List<String> lines = r.lines().collect(Collectors.toList());
-                        // Look for a line containing "version" and a dotted identifier beginning 5.
-                        Pattern version = Pattern.compile("version.* [5678]\\.[0-9]+(\\.[0-9]+)");
-                        if (lines.stream().anyMatch(line -> version.matcher(line).find())) {
-                            // found version string
-                        } else {
-                            String lineSep = System.lineSeparator();
-                            log.error("Could not determine the version of 'tidy' on the PATH\n" +
-                                    lines.stream().collect(Collectors.joining(lineSep)));
-                        }
-                    }
-                } catch (IOException e) {
-                    log.error("Could not execute 'tidy -version': " + e);
-                }
-            } else {
-                log.error("The 'tidy' program found on the PATH is not executable.");
+    private Path initTidy() {
+        Path tidyExePath;
+        String tidyProperty = System.getProperty("tidy");
+        if (tidyProperty != null) {
+            tidyExePath = Path.of(tidyProperty);
+            if (!Files.exists(tidyExePath)) {
+                log.error("tidy not found: " + tidyExePath);
+            }
+            if (!Files.isExecutable(tidyExePath)) {
+                log.error("tidy not executable: " + tidyExePath);
             }
         } else {
-            log.error("The 'tidy' program was not found on the PATH.\n" +
-                    "For information about 'tidy', see https://www.html-tidy.org/");
+            boolean isWindows = System.getProperty("os.name")
+                    .toLowerCase(Locale.US)
+                    .startsWith("windows");
+            String tidyExe = isWindows ? "tidy.exe" : "tidy";
+            Optional<Path> p = Stream.of(System.getenv("PATH")
+                    .split(File.pathSeparator))
+                    .map(Path::of)
+                    .map(d -> d.resolve(tidyExe))
+                    .filter(Files::exists)
+                    .filter(Files::isExecutable)
+                    .findFirst();
+            if (p.isPresent()) {
+                tidyExePath = p.get();
+            } else {
+                log.error("tidy not found on PATH");
+                return Path.of("tidy"); //non-null placeholder return; exception would be better
+            }
         }
+
+        try {
+            Process p = new ProcessBuilder()
+                    .command(tidyExePath.toString(), "-version")
+                    .redirectErrorStream(true)
+                    .start();
+            try (BufferedReader r =
+                         new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                List<String> lines = r.lines().collect(Collectors.toList());
+                // Look for a line containing "version" and a dotted identifier beginning 5.
+                Pattern version = Pattern.compile("version.* [5678]\\.[0-9]+(\\.[0-9]+)");
+                if (lines.stream().noneMatch(line -> version.matcher(line).find())) {
+                    String lineSep = System.lineSeparator();
+                    log.error("Could not determine the version of 'tidy' on the PATH\n" +
+                            String.join(lineSep, lines));
+                }
+            }
+        } catch (IOException e) {
+            log.error("Could not execute 'tidy -version': " + e);
+        }
+
+        return tidyExePath;
     }
 
     @Override
@@ -150,21 +162,12 @@ public class TidyChecker implements FileChecker {
                 "%6.2f average errors or warnings per file", ((errs + warns) * 1.0 / files));
         r.report(false, "");
 
-        Map<Integer, Set<String>> sortedCounts = new TreeMap<>(
-                new Comparator<Integer>() {
-                    @Override
-                    public int compare(Integer o1, Integer o2) {
-                        return o2.compareTo(o1);
-                    }
-                });
+        Map<Integer, Set<String>> sortedCounts = new TreeMap<>(Comparator.reverseOrder());
 
         for (Map.Entry<Pattern, Integer> e: counts.entrySet()) {
             Pattern p = e.getKey();
             Integer n = e.getValue();
-            Set<String> set = sortedCounts.get(n);
-            if (set == null)
-                sortedCounts.put(n, (set = new TreeSet<>()));
-            set.add(p.toString());
+            sortedCounts.computeIfAbsent(n, k -> new TreeSet<>()).add(p.toString());
         }
 
         for (Map.Entry<Integer, Set<String>> e: sortedCounts.entrySet()) {
@@ -196,13 +199,13 @@ public class TidyChecker implements FileChecker {
         if (okPattern.matcher(line).matches()) {
             ok++;
         } else if ((m = countPattern.matcher(line)).matches()) {
-            warns += Integer.valueOf(m.group(1));
-            errs += Integer.valueOf(m.group(2));
+            warns += Integer.parseInt(m.group(1));
+            errs += Integer.parseInt(m.group(2));
             if (m.group(3) != null)
                 overflow++;
         } else if ((m = countPattern2.matcher(line)).matches()) {
-            warns += Integer.valueOf(m.group(1));
-            errs += Integer.valueOf(m.group(2));
+            warns += Integer.parseInt(m.group(1));
+            errs += Integer.parseInt(m.group(2));
             if (m.group(3) != null)
                 overflow++;
         } else if (guardPattern.matcher(line).matches()) {

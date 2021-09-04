@@ -26,9 +26,10 @@
 package doccheck;
 
 import java.io.PrintWriter;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A Reporter for HTML-formatted reports.
@@ -92,12 +93,18 @@ public class HtmlReporter extends Reporter {
     public void addTableRow(List<String> values) {
         out.print("<tr>");
         values.forEach(v -> {
+            out.print("<td style=\"white-space:pre-line\">");
             String ev = encode(v);
-            if (v.matches("http[s]?:[^ ]+")) {
-                out.print("<td><a href=\"" + ev + "\">" + ev + "</a>");
-            } else {
-                out.print("<td>" + ev);
+            Pattern p = Pattern.compile("http[s]?:\\S+");
+            Matcher m = p.matcher(ev);
+            int start = 0;
+            while (m.find(start)) {
+                out.print(ev.substring(start, m.start()));
+                String url = m.group();
+                out.print("<a href=\"" + url + "\">" + url + "</a>");
+                start = m.end();
             }
+            out.print(ev.substring(start));
         });
         out.println();
     }

@@ -121,7 +121,8 @@ public class Main implements java.util.spi.ToolProvider {
                             if (item.startsWith("-")) {
                                 add = false;
                                 item = item.substring(1);
-                            }   Check c;
+                            }
+                            Check c;
                             try {
                                 c = Check.valueOf(item.toUpperCase().replace("-", "_"));
                             } catch (IllegalArgumentException e) {
@@ -193,7 +194,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         HELP("--help", false) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 options.help = true;
             }
 
@@ -209,7 +210,7 @@ public class Main implements java.util.spi.ToolProvider {
             void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
                 String value = getValue(arg, argIter);
                 try {
-                    for (String s: value.split("\\s+")) {
+                    for (String s: value.trim().split("\\s+")) {
                         Pattern p = Pattern.compile(s);
                         options.ignoreURLs.add(p);
                     }
@@ -227,7 +228,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         IGNORE_URL_REDIRECTS("--ignore-url-redirects", false) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 options.ignoreURLRedirects = true;
             }
 
@@ -240,7 +241,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         VERBOSE("--verbose", false) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 options.verbose = true;
             }
 
@@ -253,7 +254,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         JBS("--jbs", true) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 options.jbsLink = getValue(arg, argIter);
             }
 
@@ -287,7 +288,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         MODULE("--module", true) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 String list = getValue(arg, argIter);
                 options.jdkModules = Arrays.asList(list.trim().split(","));
             }
@@ -303,7 +304,7 @@ public class Main implements java.util.spi.ToolProvider {
 
         TITLE("--title", true) {
             @Override
-            void process(String arg, ListIterator<String> argIter, Options options) throws BadArgs {
+            void process(String arg, ListIterator<String> argIter, Options options) {
                 options.title = getValue(arg, argIter);
             }
 
@@ -365,7 +366,7 @@ public class Main implements java.util.spi.ToolProvider {
         abstract void help(PrintWriter out);
     }
 
-    class Options {
+    static class Options {
         Set<Check> checks = EnumSet.noneOf(Check.class);
         List<Pattern> copyrightPatterns = new ArrayList<>();
         List<Pattern> ignoreURLs = new ArrayList<>();
@@ -575,7 +576,7 @@ public class Main implements java.util.spi.ToolProvider {
                 if (Files.exists(docs.resolve("specs"))) {
                     checkGroup(options, "Other Specs", "Other Specifications",
                             options.outFile.resolve("specs"),
-                            Arrays.asList(docs.resolve("specs")), false,
+                            List.of(docs.resolve("specs")), false,
                             out);
                 }
             }
@@ -745,7 +746,7 @@ public class Main implements java.util.spi.ToolProvider {
                 if (options.baseDir != null)
                     log.setBaseDirectory(options.baseDir);
                 lc.setCheckInwardReferencesOnly(true);
-                HtmlFileChecker fc = new HtmlFileChecker(log, Arrays.asList(lc));
+                HtmlFileChecker fc = new HtmlFileChecker(log, List.of(lc));
                 for (Path file : lc.getUncheckedFiles()) {
 //                    System.err.println("CHECKING: " + file);
                     fc.checkFile(file);
@@ -771,7 +772,7 @@ public class Main implements java.util.spi.ToolProvider {
 
     void checkFiles(List<Path> paths, boolean skipSubdirs, Set<Path> excludeFiles) throws IOException {
         for (Path path : paths) {
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(path, new SimpleFileVisitor<>() {
                 int depth = 0;
 
                 @Override

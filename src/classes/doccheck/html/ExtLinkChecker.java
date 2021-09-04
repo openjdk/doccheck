@@ -172,7 +172,7 @@ public class ExtLinkChecker implements HtmlChecker {
                     Set<Path> paths = allURIs.get(uri);
                     String list = paths.stream()
                             .map(Object::toString)
-                            .collect(Collectors.joining("<br>"));
+                            .collect(Collectors.joining("\n"));
                     r.addTableRow(List.of(v, uri.toString(), list));
                 }
             }
@@ -273,7 +273,7 @@ public class ExtLinkChecker implements HtmlChecker {
 
     private void checkURI(URI uri, Set<Path> files) {
         boolean ignoreURL = ignoreURLs.stream()
-                .map(p -> p.matcher((uri.toString())))
+                .map(p -> p.matcher(uri.toString()))
                 .anyMatch(Matcher::matches);
         if (ignoreURL) {
             count(ignoreURLCounts, uri.toString(), files.size());
@@ -333,9 +333,8 @@ public class ExtLinkChecker implements HtmlChecker {
         });
 
         if (isRedirect(r)) {
-            r.headers().firstValue("location").ifPresent(l -> {
-                redirects.put(uri, URI.create(l));
-            });
+            r.headers().firstValue("location")
+                    .ifPresent(l -> redirects.put(uri, URI.create(l)));
         }
 
         boolean ok = (r.statusCode() == 200) || (isRedirect(r) && ignoreURLRedirects);
@@ -354,9 +353,8 @@ public class ExtLinkChecker implements HtmlChecker {
         count(statusCounts, getStatusString(r.statusCode()));
         count(statusInstanceCounts, getStatusString(r.statusCode()), files.size());
         if (isRedirect(r)) {
-            r.headers().firstValue("location").ifPresent(l -> {
-                redirects.put(r.request().uri(), URI.create(l));
-            });
+            r.headers().firstValue("location")
+                    .ifPresent(l -> redirects.put(r.request().uri(), URI.create(l)));
         }
     }
 
