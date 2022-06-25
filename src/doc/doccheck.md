@@ -7,27 +7,27 @@ of any possible issues.
 
 It supports the following checks:
 
-+   *HTML* -- `doccheck` leverages the standard [tidy] utility to check for HTML 
++ *HTML* -- `doccheck` leverages the standard [tidy] utility to check for HTML 
     compliance, according to the declared version of HTML. The output from `tidy` 
     is analysed to generate a report summarizing any issues that were found.
 
-+   *Accessibility* -- `doccheck` provides some very basic checking for
++ *Accessibility* -- `doccheck` provides some very basic checking for
     accessibility, such as declaring a default language, tables having captions
     and row/column headers, and so on.
 
-+   *Bad Characters* -- `doccheck` assumes that HTML files are encoded in UTF-8,
++ *Bad Characters* -- `doccheck` assumes that HTML files are encoded in UTF-8,
     and reports any character encoding issues that it finds.
 
-+   *DocType* -- `doccheck` assumes that HTML files should use HTML5, and reports
++ *DocType* -- `doccheck` assumes that HTML files should use HTML5, and reports
     any files for which that is not the case.
 
-+   *Legal* -- `doccheck` checks for the presence of expected legal text, such as
++ *Legal* -- `doccheck` checks for the presence of expected legal text, such as
     copyright notices, near the end of each file.
 
-+   *Links* -- `doccheck` checks links within a set of files, and reports on links
++ *Links* -- `doccheck` checks links within a set of files, and reports on links
     to external resources, without otherwise checking them.
 
-+   *External Links* -- `doccheck` scans the files for URLs that refer to
++ *External Links* -- `doccheck` scans the files for URLs that refer to
     external resources, and validates those references. Each external reference 
     is only checked once; but if an issue is found, all the files containing the 
     reference will be reported.
@@ -121,6 +121,22 @@ The _options_ include:
     If the file is an existing directory, or ends with `/`, 
     the report will be split into separate files in the directory; 
     otherwise, all the output will be written to a single file.
+
+### `tidy`
+
+A suitable version of `tidy` should be available on the execution `PATH`.
+The output from the `--version` option should include a line containing the
+string `version 5`.  You can also override which version of `tidy` to use
+by setting the `tidy` system property.
+
+<div style="border: 1px solid red; border-radius: 10px; padding: 10px">
+Note that the version of <code>tidy</code> on macOS available by default in 
+<code>/usr/bin/tidy</code> is old and should <b>not</b> be used. 
+It does not support HTML&nbsp;5. This version identifies itself as:
+
+> HTML Tidy for Mac OS X released on 31 October 2006 - Apple Inc. build 2649
+</div>
+
 
 Reports
 -------
