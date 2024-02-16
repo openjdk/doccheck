@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck;
+package jdk.codetools.doccheck;
 
 import java.nio.file.Path;
 import java.util.Map;

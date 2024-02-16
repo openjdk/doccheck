@@ -23,11 +23,11 @@
  * questions.
  */
 
-package doccheck.html;
+package jdk.codetools.doccheck.html;
 
-import doccheck.HtmlChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.HtmlChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 import java.io.IOException;
 import java.io.InputStream;

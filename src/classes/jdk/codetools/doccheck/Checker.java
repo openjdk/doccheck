@@ -23,20 +23,23 @@
  * questions.
  */
 
-package doccheck;
+package jdk.codetools.doccheck;
 
-import java.nio.file.Path;
+import java.io.Closeable;
 
 /**
- * Base class for file checkers.
- *
- * A file checker will be invoked once for each file to be checked.
+ * Base class for {@link FileChecker file checkers} and
+ * {@link HtmlChecker HTML checkers}.
  */
-public interface FileChecker extends Checker {
+public interface Checker extends Closeable {
+
     /**
-     * Checks the content of a specified file.
+     * Writes a report at the end of a run, to summarize the results of the
+     * checking done by this checker.
      *
-     * @param path the file
+     * @param reporter the reporter to which to write the summary
      */
-    void checkFile(Path path);
+    abstract void report(Reporter reporter);
+
+    abstract boolean isOK();
 }

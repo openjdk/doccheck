@@ -1,0 +1,120 @@
+#
+# Copyright (c) 1999, 2024, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+
+#----------------------------------------------------------------------
+#
+# compile jdk.codetools.doccheck
+
+JAVAFILES.jdk.codetools.doccheck := \
+	$(shell $(FIND) $(JAVADIR) -name \*.java -print )
+
+$(BUILDDIR)/classes.jdk.codetools.doccheck.ok: $(JAVAFILES.doccheck)
+	$(JAVAC) $(JAVAC_OPTIONS) \
+		-d $(CLASSDIR) \
+		$(JAVAFILES.jdk.codetools.doccheck)
+	echo "classes built at `date`" > $@
+
+#----------------------------------------------------------------------
+#
+# jar jdk.codetools.doccheck
+
+$(DOCCHECK_IMAGEJARDIR)/doccheck.jar: $(BUILDDIR)/classes.jdk.codetools.doccheck.ok
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(JAR) --create --file $@ --main-class=jdk.codetools.doccheck.Main -C $(CLASSDIR) .
+
+BUILDFILES += $(DOCCHECK_IMAGEJARDIR)/doccheck.jar
+
+#----------------------------------------------------------------------
+#
+# shell script
+
+$(DOCCHECK_IMAGEDIR)/bin/doccheck: $(SRCBINDIR)/doccheck.sh
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $< $@
+	$(CHMOD) a+x,a-w $@
+
+BUILDFILES += $(DOCCHECK_IMAGEDIR)/bin/doccheck
+
+#----------------------------------------------------------------------
+#
+# docs
+
+$(DOCCHECK_IMAGEDOCDIR)/doccheck.html: $(SRCDOCDIR)/doccheck.md
+	$(MKDIR) -p $(@D)
+	$(PANDOC) \
+		--standalone \
+		--to html5 \
+		--output $@ \
+		--css stylesheet.css \
+		$<
+
+BUILDFILES += $(DOCCHECK_IMAGEDOCDIR)/doccheck.html
+
+
+$(DOCCHECK_IMAGEDOCDIR)/stylesheet.css: $(SRCDOCDIR)/stylesheet.css
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $< $@
+
+BUILDFILES += $(DOCCHECK_IMAGEDOCDIR)/stylesheet.css
+
+
+$(DOCCHECK_IMAGEDOCDIR)/doccheck.1: $(SRCDOCDIR)/doccheck.md
+	$(MKDIR) -p $(@D)
+	$(PANDOC) \
+		--variable=section:1 \
+		--output $@ \
+		--css stylesheet.css \
+		$<
+
+BUILDFILES += $(DOCCHECK_IMAGEDOCDIR)/doccheck.1
+
+#----------------------------------------------------------------------
+#
+# other
+
+$(DOCCHECK_IMAGEDIR)/LICENSE: $(TOPDIR)/LICENSE
+	$(MKDIR) -p $(@D)
+	$(RM) $@
+	$(CP) $< $@
+
+BUILDFILES += $(DOCCHECK_IMAGEDIR)/LICENSE
+
+#----------------------------------------------------------------------
+#
+# zip
+
+DOCCHECK_ZIP = $(IMAGES_DIR)/doccheck.zip
+
+$(DOCCHECK_ZIP): $(BUILDFILES)
+	$(RM) $@
+	cd $(IMAGES_DIR); $(ZIP) -rq $@ $(@F:%.zip=%)
+
+
+VERBOSEZIPFILES += $(DOCCHECK_ZIP:%.zip=%-$(VERBOSE_ZIP_SUFFIX).zip)
+
+

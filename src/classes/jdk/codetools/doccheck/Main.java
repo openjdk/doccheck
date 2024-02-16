@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck;
+package jdk.codetools.doccheck;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,13 +51,13 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import doccheck.accessibility.AccessibilityChecker;
-import doccheck.html.BadCharacterChecker;
-import doccheck.html.DocTypeChecker;
-import doccheck.html.ExtLinkChecker;
-import doccheck.html.LinkChecker;
-import doccheck.legal.LegalNoticeChecker;
-import doccheck.html.TidyChecker;
+import jdk.codetools.doccheck.html.BadCharacterChecker;
+import jdk.codetools.doccheck.html.DocTypeChecker;
+import jdk.codetools.doccheck.html.ExtLinkChecker;
+import jdk.codetools.doccheck.html.LinkChecker;
+import jdk.codetools.doccheck.html.TidyChecker;
+import jdk.codetools.doccheck.legal.LegalNoticeChecker;
+import jdk.codetools.doccheck.accessibility.AccessibilityChecker;
 
 /**
  * Main entry point for doccheck.
@@ -441,7 +441,7 @@ public class Main implements java.util.spi.ToolProvider {
 
     @Override // java.util.spi.ToolProvider
     public String name() {
-        return "doccheck";
+        return "jdk/codetools/doccheck";
     }
 
     @Override // java.util.spi.ToolProvider

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck.legal;
+package jdk.codetools.doccheck.legal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,9 +40,9 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import doccheck.FileChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.FileChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 /**
  * Checks for the presence of appropriate legal notices at the end of each
