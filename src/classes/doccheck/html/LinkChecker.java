@@ -379,7 +379,10 @@ public class LinkChecker implements HtmlChecker {
                 } else {
                     p = currFile.getParent().resolve(uriPath).normalize();
                 }
-                foundReference(line, p, uri.getFragment());
+                var fragment = uri.getFragment();
+                if (fragment != null && !fragment.isEmpty()) {
+                    foundReference(line, p, fragment);
+                }
             }
         } catch (URISyntaxException e) {
             log.error(currFile, line, "invalid URI: " + e);
@@ -398,12 +401,14 @@ public class LinkChecker implements HtmlChecker {
         }
 
         String fragment = uri.getRawFragment();
-        try {
-            URI noFrag = new URI(uri.toString().replaceAll("#\\Q" + fragment + "\\E$", ""));
-            IDTable t = allURIs.computeIfAbsent(noFrag, key -> new IDTable(key));
-            t.addReference(fragment, currFile, line);
-        } catch (URISyntaxException e) {
-            throw new Error(e);
+        if (fragment != null && !fragment.isEmpty()) {
+            try {
+                URI noFrag = new URI(uri.toString().replaceAll("#\\Q" + fragment + "\\E$", ""));
+                IDTable t = allURIs.computeIfAbsent(noFrag, key -> new IDTable(key));
+                t.addReference(fragment, currFile, line);
+            } catch (URISyntaxException e) {
+                throw new Error(e);
+            }
         }
     }
 
