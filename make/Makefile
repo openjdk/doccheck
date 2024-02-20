@@ -27,17 +27,17 @@ TOPDIR = ..
 
 include Defs.gmk
 
-default: build
+default: images
 
 all: build test
 
 #----------------------------------------------------------------------
 
 include doccheck.gmk
-include $(TOPDIR)/test/*/*.gmk
+#include $(TOPDIR)/test/*/*.gmk
 include Rules.gmk
 
-build: check-build-vars $(BUILDFILES)
+build: check-build-vars $(BUILDFILES) images
 
 images: $(VERBOSEZIPFILES)
 
