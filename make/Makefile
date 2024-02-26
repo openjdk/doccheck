@@ -50,14 +50,6 @@ clean:
 
 sanity:
 	@echo "JDKHOME               = $(JDKHOME)"
-	@echo "JUNIT_JAR             = $(JUNIT_JAR)"
-	@echo "JCOMMANDER_JAR        = $(JCOMMANDER_JAR)"
-	@echo "JAVADIFFUTILS_JAR     = $(JAVADIFFUTILS_JAR)"
-	@echo "JAVADIFFUTILS_LICENSE = $(JAVADIFFUTILS_LICENSE)"
-	@echo "DAISYDIFF_JAR         = $(DAISYDIFF_JAR)"
-	@echo "DAISYDIFF_LICENSE     = $(DAISYDIFF_LICENSE)"
-	@echo "HTMLCLEANER_JAR       = $(HTMLCLEANER_JAR)"
-	@echo "HTMLCLEANER_LICENSE   = $(HTMLCLEANER_LICENSE)"
 
 check-build-vars:
 	@if [ -z "$(JDKHOME)" ]; then \
