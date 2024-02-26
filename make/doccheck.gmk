@@ -30,7 +30,7 @@
 JAVAFILES.jdk.codetools.doccheck := \
 	$(shell $(FIND) $(JAVADIR) -name \*.java -print )
 
-$(BUILDDIR)/classes.jdk.codetools.doccheck.ok: $(JAVAFILES.doccheck)
+$(BUILDDIR)/classes.jdk.codetools.doccheck.ok: $(JAVAFILES.jdk.codetools.doccheck)
 	$(JAVAC) $(JAVAC_OPTIONS) \
 		-d $(CLASSDIR) \
 		$(JAVAFILES.jdk.codetools.doccheck)
