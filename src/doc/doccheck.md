@@ -7,29 +7,29 @@ of any possible issues.
 
 It supports the following checks:
 
-+   *HTML* -- `doccheck` leverages the standard [tidy] utility to check for HTML 
-    compliance, according to the declared version of HTML. The output from `tidy` 
++ *HTML* -- `doccheck` leverages the standard [tidy] utility to check for HTML
+    compliance, according to the declared version of HTML. The output from `tidy`
     is analysed to generate a report summarizing any issues that were found.
 
-+   *Accessibility* -- `doccheck` provides some very basic checking for
++ *Accessibility* -- `doccheck` provides some very basic checking for
     accessibility, such as declaring a default language, tables having captions
     and row/column headers, and so on.
 
-+   *Bad Characters* -- `doccheck` assumes that HTML files are encoded in UTF-8,
++ *Bad Characters* -- `doccheck` assumes that HTML files are encoded in UTF-8,
     and reports any character encoding issues that it finds.
 
-+   *DocType* -- `doccheck` assumes that HTML files should use HTML5, and reports
++ *DocType* -- `doccheck` assumes that HTML files should use HTML5, and reports
     any files for which that is not the case.
 
-+   *Legal* -- `doccheck` checks for the presence of expected legal text, such as
++ *Legal* -- `doccheck` checks for the presence of expected legal text, such as
     copyright notices, near the end of each file.
 
-+   *Links* -- `doccheck` checks links within a set of files, and reports on links
++ *Links* -- `doccheck` checks links within a set of files, and reports on links
     to external resources, without otherwise checking them.
 
-+   *External Links* -- `doccheck` scans the files for URLs that refer to
-    external resources, and validates those references. Each external reference 
-    is only checked once; but if an issue is found, all the files containing the 
++ *External Links* -- `doccheck` scans the files for URLs that refer to
+    external resources, and validates those references. Each external reference
+    is only checked once; but if an issue is found, all the files containing the
     reference will be reported.
 
 These checks can be independently enabled/disabled using the `--check` option
@@ -39,11 +39,11 @@ on the `doccheck` command line.
 USAGE
 -----
 
-`$ java -jar` _/path/to/_`doccheck.jar`  _options_  _files_  
+`$ java -jar` _/path/to/_`doccheck.jar`  _options_  _files_
 
 The _files_ can be any series of HTML files or directories containing HTML files.
 
-The _options_ include:  
+The _options_ include:
 
 `--base-directory` _dir_
 :   Set a base directory for paths on command line and in log files.
@@ -51,10 +51,10 @@ The _options_ include:
 `--check` _key(,key)\*_
 :   Check aspects of HTML files.
     Supported keys are:
-    
+
     Key              Use
     --------------   ----------------------------------------
-    `all`            Enable all checks 
+    `all`            Enable all checks
     `accessibility`  Check accessibility
     `bad_chars`      Check for bad characters in the files
     `doctype`        Check for HTML doctype
@@ -63,13 +63,13 @@ The _options_ include:
     `links`          Check internal links
     `extlinks`       Check external links
     `none`           Disable all checks
-  
+
     Precede any key (except `all` and `none`) by '-' to negate its effect.  For example,
     `--check all,-legal`
 
 `--copyright` _regex_
 :   Specify a regular expression for an acceptable copyright line for the 'legal' checker.
-    The option may be given multiple times.  
+    The option may be given multiple times.
     If not given, the 'legal' checker will report "unknown copyright" for lines
     that contain the word "Copyright" near the end of each HTML file.
 
@@ -80,67 +80,83 @@ The _options_ include:
 :   Display this text.
 
 `--ignore-url` _regex_
-:   Specify one or more regular expressions, separated by white-space, for URLs to 
+:   Specify one or more regular expressions, separated by white-space, for URLs to
     ignore in the 'extLinks' checker. The URLs will still be listed in the report,
     but will not be checked for validity and/or cause any errors.
-   
+
 `--ignore-url-redirects`
 :   Do not warn about URL redirects in the 'extLinks' checker.
     The redirected URLs will still be listed in the report, but will not cause
     any warnings or errors.
-   
+
 `--verbose`
 :   Trace execution.
-    
+
 `--jbs` _url_
 :   Specify a URL to include in the report. This may be used to specify a URL
     that is a query for open issues related to errors in the documentation.
-    
+
 `--jdk` _jdk-docs-directory_
 :   Generate a report for each module in a JDK docs bundle.
     Information about the modules and their contents will be reflectively
     determined from the runtime used to execute `doccheck`.
     By default, all modules with unqualified exports will be included in the
     report, as well as files in the top-level directory, and in the `specs`
-    subdirectory. 
+    subdirectory.
     The set of modules can be specified explicitly with the `--module` option.
-    
+
 `--module` _name(_ `,` _name)\*_
 :   Specify the set of modules to be analyzed when generating a JDK report.
     In general, the names should be the names of modules in the JDK
     runtime and documentation, but two additional names are also recognized:
-    
+
     * `specs` -- the set of files in the `specs` directory (and its subdirectories)
     * `top-files` -- the set of files in the top level documentation directory
-    
+
 `--title` _string_
 :   Specify a title for the report that is generated.
-    
+
 `--report` _file_
 :   Specify where to write the report.
-    If the file is an existing directory, or ends with `/`, 
-    the report will be split into separate files in the directory; 
+    If the file is an existing directory, or ends with `/`,
+    the report will be split into separate files in the directory;
     otherwise, all the output will be written to a single file.
+
+### `tidy`
+
+A suitable version of `tidy` should be available on the execution `PATH`.
+The output from the `--version` option should include a line containing the
+string `version 5`.  You can also override which version of `tidy` to use
+by setting the `tidy` system property.
+
+<div style="border: 1px solid red; border-radius: 10px; padding: 10px">
+Note that the version of <code>tidy</code> on macOS available by default in
+<code>/usr/bin/tidy</code> is old and should <b>not</b> be used.
+It does not support HTML&nbsp;5. This version identifies itself as:
+
+> HTML Tidy for Mac OS X released on 31 October 2006 - Apple Inc. build 2649
+</div>
+
 
 Reports
 -------
 
 The report can either be a single text file, or a directory of files
 that are a mix of an HTML report file, and plain-text logs that give
-details of any errors that are found. 
+details of any errors that are found.
 
 To generate a report in a directory, the `--output` option should either
 name an existing directory, or it should end with the platform file separator
 (`\` on Windows, `/` otherwise).
 
-When the `--jdk` option is used, a special mode is invoked, such that the checks 
-are invoked separately on the set of files for each of the specified modules, 
-writing a report for each invocation into subdirectories of the output directory. 
+When the `--jdk` option is used, a special mode is invoked, such that the checks
+are invoked separately on the set of files for each of the specified modules,
+writing a report for each invocation into subdirectories of the output directory.
 An umbrella report is then generated in the output directory itself:
-this report is a table containing one line per module, giving a simple visual 
+this report is a table containing one line per module, giving a simple visual
 indication of the outcome of the selected checks.
 
-A title for the report can be specified with the `--title` option; 
+A title for the report can be specified with the `--title` option;
 a JBS URL to include at the end of the report can be specified with the `--jbs` option.
 
 EXAMPLES
@@ -165,11 +181,11 @@ $jdk/bin/java \
 
 When using the 'extLinks' checker, you may need to set up proxies to access external URLs.
 Use the standard Java [networking properties] to set up any necessary proxies.
-Also, some external URLs may not be available before a version of JDK is released. 
+Also, some external URLs may not be available before a version of JDK is released.
 To suppress the checks for these URLs, specify one or more regular expressions with
 the `--ignore-urls` option.
 
-When using the 'legal' checker, it is recommended to specify one or more regular expressions 
+When using the 'legal' checker, it is recommended to specify one or more regular expressions
 for approved "legal" text that should be found near the end of each file.
 Note that different files may use different paths (using a different number of leading `../`
 strings) depending on the position of the file in the overall documentation hierarchy.
@@ -202,7 +218,7 @@ $jdk/bin/java \
 To generate a report for JDK documentation that contains details for each module,
 use the `--jdk` option to specify the root of the JDK documentation. This is
 typically the directory that contains the `api/` and `specs/` subdirectories.
-When using the `--jdk` option, you should not specify any additional files on 
+When using the `--jdk` option, you should not specify any additional files on
 the command line.
 
 ````shell

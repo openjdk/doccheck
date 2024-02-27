@@ -57,7 +57,7 @@ import jdk.codetools.doccheck.Reporter;
 public class TidyChecker implements FileChecker {
     private final Log log;
     private boolean passed;
-    private Path TIDY;
+    private final Path TIDY;
 
     private Path path;
 
@@ -127,11 +127,15 @@ public class TidyChecker implements FileChecker {
                          new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 List<String> lines = r.lines().collect(Collectors.toList());
                 // Look for a line containing "version" and a dotted identifier beginning 5.
+                // If not found, look for known old/bad versions, to report in error message
                 Pattern version = Pattern.compile("version.* [5678]\\.[0-9]+(\\.[0-9]+)");
                 if (lines.stream().noneMatch(line -> version.matcher(line).find())) {
+                    Pattern oldVersion = Pattern.compile("2006");  // 2006 implies old macOS version
                     String lineSep = System.lineSeparator();
-                    log.error("Could not determine the version of 'tidy' on the PATH\n" +
-                            String.join(lineSep, lines));
+                    String message = lines.stream().anyMatch(line -> oldVersion.matcher(line).find())
+                        ? "old version of 'tidy' found of  the PATH\n"
+                        : "could not determine the version of 'tidy' on the PATH\n";
+                    log.error(message + String.join(lineSep, lines));
                 }
             }
         } catch (IOException e) {
