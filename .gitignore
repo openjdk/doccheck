@@ -1,0 +1,8 @@
+/build/
+/dist/
+/.idea/
+nbproject/private/
+/webrev
+/.src-rev
+**.iml
+.DS_store

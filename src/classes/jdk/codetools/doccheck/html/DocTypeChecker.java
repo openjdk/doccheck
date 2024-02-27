@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck.html;
+package jdk.codetools.doccheck.html;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,9 +37,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import doccheck.HtmlChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.HtmlChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 /**
  * Checks the DocType declared at the head of an HTML file.

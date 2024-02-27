@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck;
+package jdk.codetools.doccheck;
 
 import java.io.PrintWriter;
 import java.util.Iterator;

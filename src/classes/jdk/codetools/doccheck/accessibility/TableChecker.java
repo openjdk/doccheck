@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck.accessibility;
+package jdk.codetools.doccheck.accessibility;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,9 +36,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import doccheck.HtmlChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.HtmlChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 /**
  * Checks that HTML tables have suitable row and column headers,

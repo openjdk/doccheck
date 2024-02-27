@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck.html;
+package jdk.codetools.doccheck.html;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,9 +45,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import doccheck.FileChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.FileChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 /**
  * Checks the HTML content of a file using the <em>tidy</em> utility program

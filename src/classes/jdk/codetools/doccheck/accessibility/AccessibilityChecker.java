@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck.accessibility;
+package jdk.codetools.doccheck.accessibility;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -31,9 +31,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 
-import doccheck.HtmlChecker;
-import doccheck.Log;
-import doccheck.Reporter;
+import jdk.codetools.doccheck.HtmlChecker;
+import jdk.codetools.doccheck.Log;
+import jdk.codetools.doccheck.Reporter;
 
 /**
  * Checks the content of an HTML file for compliance with accessibility rules and

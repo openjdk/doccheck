@@ -23,7 +23,7 @@
  * questions.
  */
 
-package doccheck;
+package jdk.codetools.doccheck;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
