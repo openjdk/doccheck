@@ -28,4 +28,5 @@
 # Build zips with verbose names
 
 %-$(VERBOSE_ZIP_SUFFIX).zip: %.zip
+	$(RM) $@
 	ln $(@:%-$(VERBOSE_ZIP_SUFFIX).zip=%.zip) $@
